@@ -190,7 +190,82 @@ function saveUp(){var t=document.getElementById("upgradeI").value.trim();var o=d
 [["c1","courses"],["c2","crypto"],["c3","affiliate"],["c4","youtube"],["c5","computer"],["c6","anything"]].forEach(function(pair){
   var el=document.getElementById(pair[0]);if(!el)return;
   (T[pair[1]].ch||[]).forEach(function(c){var b=document.createElement("button");b.className="chip";b.textContent=c;b.onclick=function(){document.getElementById(pair[1]+"I").value=c;};el.appendChild(b);});
+}); }});
+// ==========================================
+// 1. WIRING UP THE ASK ME ANYTHING CHAT TILE
+// ==========================================
+const askTile = document.querySelector(".ask-me-anything-btn") || document.querySelector('[data-tile="chat"]') || document.body;
+
+askTile.addEventListener("click", async (e) => {
+    if (e.target.closest('.ask-me-anything-btn') || e.target.innerText.includes("Ask Me Anything")) {
+        const userPrompt = prompt("What do you want to ask Hunter 365?");
+        if (!userPrompt) return;
+
+        try {
+            alert("Hunter 365 is thinking...");
+            const response = await fetch("https://onrender.com", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ question: userPrompt })
+            });
+            const data = await response.json();
+            alert("Hunter 365 says:\n\n" + data.answer);
+        } catch (err) {
+            alert("Connection timed out. Hunter's server may be waking up from sleep mode!");
+        }
+    }
+});
+
+// ==========================================
+// 2. WIRING UP THE 5-PHOTO GENERATOR CANVAS
+// ==========================================
+const generateButton = document.querySelector("#generate-canvas-btn") || document.querySelector('.generate-btn') || document.body;
+
+generateButton.addEventListener("click", async (e) => {
+    if (e.target.id === "generate-canvas-btn" || e.target.innerText.includes("GENERATE")) {
+        const fileInputs = document.querySelectorAll('input[type="file"]');
+        const formData = new FormData();
+        
+        let filesFound = 0;
+        fileInputs.forEach(input => {
+            if (input.files && input.files[0]) {
+                formData.append('photos', input.files[0]);
+                filesFound++;
+            }
+        });
+
+        if (filesFound === 0) {
+            alert("Please load at least one reference photo into Hunter's slots first.");
+            return;
+        }
+
+        formData.append('instructions', (document.querySelector('#describe-image-box') || {value: ""}).value);
+        formData.append('background', (document.querySelector('#background-style') || {value: "default"}).value); 
+        formData.append('lighting', (document.querySelector('#lighting-toggle') || {value: "standard"}).value);    
+        formData.append('artStyle', (document.querySelector('#style-setting') || {value: "realistic"}).value);     
+
+        try {
+            alert("Hunter 365 has started drawing your image...");
+            const response = await fetch("https://onrender.com", {
+                method: "POST",
+                body: formData
+            });
+            const data = await response.json();
+
+            if (data.imageUrl) {
+                const previewSlot = document.querySelector('#ai-generated-image-slot') || document.querySelector('img[alt="AI Generated Image"]');
+                if (previewSlot) previewSlot.src = data.imageUrl;
+            } else {
+                alert("Error drawing: " + data.error);
+            }
+        } catch (err) {
+            alert("Failed to communicate with Hunter's design engine.");
+        }
+    }
 });
 </script>
 </body>
 </html>
+
+
+
