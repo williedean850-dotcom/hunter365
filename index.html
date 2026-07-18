@@ -245,7 +245,7 @@ function saveUp(){var t=document.getElementById("upgradeI").value.trim();var o=d
   var u=new SpeechSynthesisUtterance(text);
     var voices=window.speechSynthesis.getVoices();var mv=voices.find(function(v){return /male/i.test(v.name)&&!/female/i.test(v.name);});if(mv)u.voice=mv;
 u.pitch=0.6;
-u.rate=0.9;
+u.rate=0.8;
   var heroImg=document.querySelector(".hero img,.logo");
   u.onstart=function(){if(heroImg)heroImg.classList.add("talking-glow");};
   u.onend=function(){if(heroImg)heroImg.classList.remove("talking-glow");};
